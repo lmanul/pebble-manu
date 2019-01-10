@@ -9,22 +9,25 @@ static TextLayer *s_name_layer2;
 static TextLayer *s_time_layer2;
 
 const int LINE_HEIGHT = 30;
-const int X_PADDING = 8;
+const int X_PADDING = 6;
 const int Y_PADDING = 2;
 const int TZ_VALUE_X_POS = 80;
 
-const char* TZ_NAMES[] = {"UTC-1", "UTC-2", "UTC-3", "UTC-4", "UTC-5"};
+const char* TZ_NAMES[] = {"UTC", "Bangkok", "UTC-3", "UTC-4", "UTC-5"};
+const int TZ_OFFSETS[] = {0, 7};
 
 static void update_time() {
     time_t current_time = time(NULL);
     struct tm *utc_tm = gmtime(&current_time);
+    struct tm *bkk_tm = localtime(&current_time);
 
-    // Write the current hours and minutes into a buffer
     static char s_hours_buffer[8];
-    strftime(s_hours_buffer, sizeof(s_hours_buffer), "%H:%M", utc_tm);
 
+    strftime(s_hours_buffer, sizeof(s_hours_buffer), "%H:%M", utc_tm);
     text_layer_set_text(s_name_layer1, TZ_NAMES[0]);
     text_layer_set_text(s_time_layer1, s_hours_buffer);
+
+    strftime(s_hours_buffer, sizeof(s_hours_buffer), "%H:%M", bkk_tm);
     text_layer_set_text(s_name_layer2, TZ_NAMES[1]);
     text_layer_set_text(s_time_layer2, s_hours_buffer);
 }
