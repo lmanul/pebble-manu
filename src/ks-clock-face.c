@@ -13,7 +13,7 @@ const int X_PADDING = 6;
 const int Y_PADDING = 2;
 const int TZ_VALUE_X_POS = 80;
 
-const char* TZ_NAMES[] = {"UTC", "Bangkok", "UTC-3", "UTC-4", "UTC-5"};
+const char* TZ_NAMES[] = {"UTC", "BKK", "UTC-3", "UTC-4", "UTC-5"};
 const int TZ_OFFSETS[] = {0, 7};
 
 static void update_time() {
@@ -39,7 +39,7 @@ static void tick_minute_handler(struct tm *tick_time, TimeUnits units_changed) {
 static void apply_style(TextLayer* t) {
   text_layer_set_background_color(t, GColorWhite);
   text_layer_set_text_color(t, GColorBlack);
-  text_layer_set_font(t, fonts_get_system_font(FONT_KEY_GOTHIC_24));
+  text_layer_set_font(t, fonts_get_system_font(FONT_KEY_GOTHIC_28));
 }
 
 static void main_window_load(Window *window) {
