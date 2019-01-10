@@ -9,10 +9,10 @@ static TextLayer *s_name_layer2;
 static TextLayer *s_time_layer2;
 static GFont s_font;
 
-const int LINE_HEIGHT = 40;
-const int X_PADDING = 10;
-const int Y_PADDING = 5;
-const int TZ_VALUE_X_POS = 100;
+const int LINE_HEIGHT = 30;
+const int X_PADDING = 8;
+const int Y_PADDING = 2;
+const int TZ_VALUE_X_POS = 80;
 
 const char* TZ_NAMES[] = {"UTC-1", "UTC-2", "UTC-3", "UTC-4", "UTC-5"};
 
