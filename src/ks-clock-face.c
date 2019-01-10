@@ -7,7 +7,6 @@ static TextLayer *s_name_layer1;
 static TextLayer *s_time_layer1;
 static TextLayer *s_name_layer2;
 static TextLayer *s_time_layer2;
-static GFont s_font;
 
 const int LINE_HEIGHT = 30;
 const int X_PADDING = 8;
@@ -34,11 +33,16 @@ static void tick_minute_handler(struct tm *tick_time, TimeUnits units_changed) {
     update_time();
 }
 
+static void apply_style(TextLayer* t) {
+  text_layer_set_background_color(t, GColorWhite);
+  text_layer_set_text_color(t, GColorBlack);
+  text_layer_set_font(t, fonts_get_system_font(FONT_KEY_GOTHIC_24));
+}
+
 static void main_window_load(Window *window) {
     // Get information about the Window
     Layer *window_layer = window_get_root_layer(window);
     GRect bounds = layer_get_bounds(window_layer);
-    s_font = fonts_get_system_font(FONT_KEY_GOTHIC_24);
 
     s_name_layer1 = text_layer_create(GRect(0, 0, TZ_VALUE_X_POS - X_PADDING, LINE_HEIGHT));
     s_time_layer1 = text_layer_create(GRect(TZ_VALUE_X_POS, 0, bounds.size.w - TZ_VALUE_X_POS, LINE_HEIGHT));
@@ -48,24 +52,16 @@ static void main_window_load(Window *window) {
     s_time_layer2 = text_layer_create(GRect(
         TZ_VALUE_X_POS, LINE_HEIGHT + Y_PADDING, bounds.size.w - TZ_VALUE_X_POS, LINE_HEIGHT));
 
-    text_layer_set_background_color(s_name_layer1, GColorWhite);
-    text_layer_set_text_color(s_name_layer1, GColorBlack);
-    text_layer_set_font(s_name_layer1, s_font);
+    apply_style(s_name_layer1);
     text_layer_set_text_alignment(s_name_layer1, GTextAlignmentRight);
 
-    text_layer_set_background_color(s_time_layer1, GColorWhite);
-    text_layer_set_text_color(s_time_layer1, GColorBlack);
-    text_layer_set_font(s_time_layer1, s_font);
+    apply_style(s_time_layer1);
     text_layer_set_text_alignment(s_time_layer1, GTextAlignmentLeft);
 
-    text_layer_set_background_color(s_name_layer2, GColorWhite);
-    text_layer_set_text_color(s_name_layer2, GColorBlack);
-    text_layer_set_font(s_name_layer2, s_font);
+    apply_style(s_name_layer2);
     text_layer_set_text_alignment(s_name_layer2, GTextAlignmentRight);
 
-    text_layer_set_background_color(s_time_layer2, GColorWhite);
-    text_layer_set_text_color(s_time_layer2, GColorBlack);
-    text_layer_set_font(s_time_layer2, s_font);
+    apply_style(s_time_layer2);
     text_layer_set_text_alignment(s_time_layer2, GTextAlignmentLeft);
 
     layer_add_child(window_layer, text_layer_get_layer(s_name_layer1));
@@ -79,9 +75,6 @@ static void main_window_unload(Window *window) {
     text_layer_destroy(s_time_layer1);
     text_layer_destroy(s_name_layer2);
     text_layer_destroy(s_time_layer2);
-
-    // Unload custom font
-    fonts_unload_custom_font(s_font);
 }
 
 static void init() {
