@@ -1,0 +1,19 @@
+{
+  "uuid": "c02c6432-15ee-46a2-9f51-db8790529850",
+  "shortName": "pebble-manu",
+  "longName": "pebble-manu",
+  "companyName": "MakeAwesomeHappen",
+  "versionLabel": "1.0",
+  "sdkVersion": "3",
+  "targetPlatforms": ["aplite", "basalt", "chalk"],
+  "enableMultiJS": true,
+  "watchapp": {
+    "watchface": false
+  },
+  "appKeys": {
+    "dummy": 0
+  },
+  "resources": {
+    "media": []
+  }
+}
