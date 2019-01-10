@@ -30,7 +30,7 @@ static void main_window_load(Window *window) {
     Layer *window_layer = window_get_root_layer(window);
     GRect bounds = layer_get_bounds(window_layer);
 
-    s_font = fonts_get_system_font(FONT_KEY_GOTHIC_18);
+    s_font = fonts_get_system_font(FONT_KEY_GOTHIC_24);
     //s_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_OPEN_SANS_70));
 
     // Create the TextLayer with specific bounds
