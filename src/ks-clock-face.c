@@ -58,38 +58,29 @@ static void apply_style(TextLayer* t) {
 }
 
 static void main_window_load(Window *window) {
-    // Get information about the Window
-    Layer *window_layer = window_get_root_layer(window);
-    GRect bounds = layer_get_bounds(window_layer);
+  // Get information about the Window
+  Layer *window_layer = window_get_root_layer(window);
+  GRect bounds = layer_get_bounds(window_layer);
 
-    const int name_width = TZ_VALUE_X_POS - X_PADDING;
-    s_name_layers[0] = text_layer_create(GRect(
-        0, 0 * (LINE_HEIGHT + Y_PADDING), name_width, LINE_HEIGHT));
-    s_time_layers[0] = text_layer_create(GRect(
-        TZ_VALUE_X_POS, 0 * (LINE_HEIGHT + Y_PADDING), bounds.size.w - TZ_VALUE_X_POS, LINE_HEIGHT));
+  const int name_width = TZ_VALUE_X_POS - X_PADDING;
 
-    s_name_layers[1] = text_layer_create(GRect(
-        0, 1 * (LINE_HEIGHT + Y_PADDING), name_width, LINE_HEIGHT));
-    s_time_layers[1] = text_layer_create(GRect(
-        TZ_VALUE_X_POS, 1 * (LINE_HEIGHT + Y_PADDING), bounds.size.w - TZ_VALUE_X_POS, LINE_HEIGHT));
+  for (int i = 0; i < TZ_COUNT; i++) {
+    s_name_layers[i] = text_layer_create(GRect(
+        0, i * (LINE_HEIGHT + Y_PADDING), name_width, LINE_HEIGHT));
+    s_time_layers[i] = text_layer_create(GRect(
+        TZ_VALUE_X_POS, i * (LINE_HEIGHT + Y_PADDING), bounds.size.w - TZ_VALUE_X_POS, LINE_HEIGHT));
+  }
 
-    s_name_layers[2] = text_layer_create(GRect(
-        0, 2 * (LINE_HEIGHT + Y_PADDING), name_width, LINE_HEIGHT));
-    s_time_layers[2] = text_layer_create(GRect(
-        TZ_VALUE_X_POS, 2 * (LINE_HEIGHT + Y_PADDING), bounds.size.w - TZ_VALUE_X_POS, LINE_HEIGHT));
+  for (int i = 0; i < TZ_COUNT; i++) {
+    apply_style(s_name_layers[i]);
+    text_layer_set_text_alignment(s_name_layers[i], GTextAlignmentRight);
 
-    for (int i = 0; i < TZ_COUNT; i++) {
-      apply_style(s_name_layers[i]);
-      text_layer_set_text_alignment(s_name_layers[i], GTextAlignmentRight);
+    apply_style(s_time_layers[i]);
+    text_layer_set_text_alignment(s_time_layers[i], GTextAlignmentLeft);
 
-      apply_style(s_time_layers[i]);
-      text_layer_set_text_alignment(s_time_layers[i], GTextAlignmentLeft);
-    }
-
-    for (int i = 0; i < TZ_COUNT; i++) {
-      layer_add_child(window_layer, text_layer_get_layer(s_name_layers[i]));
-      layer_add_child(window_layer, text_layer_get_layer(s_time_layers[i]));
-    }
+    layer_add_child(window_layer, text_layer_get_layer(s_name_layers[i]));
+    layer_add_child(window_layer, text_layer_get_layer(s_time_layers[i]));
+  }
 }
 
 static void main_window_unload(Window *window) {
