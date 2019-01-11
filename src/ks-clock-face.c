@@ -7,14 +7,16 @@ static TextLayer *s_name_layer1;
 static TextLayer *s_time_layer1;
 static TextLayer *s_name_layer2;
 static TextLayer *s_time_layer2;
+static TextLayer *s_name_layer3;
+static TextLayer *s_time_layer3;
 
 const int LINE_HEIGHT = 30;
 const int X_PADDING = 6;
 const int Y_PADDING = 2;
 const int TZ_VALUE_X_POS = 80;
 
-const char* TZ_NAMES[] = {"UTC", "BKK", "UTC-3", "UTC-4", "UTC-5"};
-const int TZ_OFFSETS[] = {0, 7, 0, 0, 0};
+const char* TZ_NAMES[] = {"SFO", "UTC", "BKK", "UTC-3", "UTC-4"};
+const int TZ_OFFSETS[] = {-8, 0, 7, 0, 0};
 
 static void update_time() {
     time_t current_time = time(NULL);
@@ -22,28 +24,45 @@ static void update_time() {
     const int utc_hour = utc_tm->tm_hour;
     const int utc_min  = utc_tm->tm_min;
 
-    struct tm bkk_tm;
-    bkk_tm.tm_min = utc_min;
-    if (utc_hour < 24 - TZ_OFFSETS[1]) {
-      bkk_tm.tm_hour = utc_hour + TZ_OFFSETS[1];
+    // TODO: arrays!
+
+    struct tm sfo_tm;
+    sfo_tm.tm_min = utc_min;
+    if (utc_hour < 24 - TZ_OFFSETS[0]) {
+      sfo_tm.tm_hour = utc_hour + TZ_OFFSETS[0];
     } else {
-      bkk_tm.tm_hour = (utc_hour + TZ_OFFSETS[1]) % 24;
+      sfo_tm.tm_hour = (utc_hour + TZ_OFFSETS[0]) % 24;
     }
 
+    // UTC time: no offset.
+
+    struct tm bkk_tm;
+    bkk_tm.tm_min = utc_min;
+    if (utc_hour < 24 - TZ_OFFSETS[2]) {
+      bkk_tm.tm_hour = utc_hour + TZ_OFFSETS[2];
+    } else {
+      bkk_tm.tm_hour = (utc_hour + TZ_OFFSETS[2]) % 24;
+    }
+
+    static char s_time_buffer_sfo[8];
     static char s_time_buffer_utc[8];
     static char s_time_buffer_bkk[8];
 
-    strftime(s_time_buffer_utc, sizeof(s_time_buffer_utc), "%H:%M", utc_tm);
+    strftime(s_time_buffer_sfo, sizeof(s_time_buffer_sfo), "%H:%M", &sfo_tm);
     text_layer_set_text(s_name_layer1, TZ_NAMES[0]);
-    text_layer_set_text(s_time_layer1, s_time_buffer_utc);
+    text_layer_set_text(s_time_layer1, s_time_buffer_sfo);
+
+    strftime(s_time_buffer_utc, sizeof(s_time_buffer_utc), "%H:%M", utc_tm);
+    text_layer_set_text(s_name_layer2, TZ_NAMES[1]);
+    text_layer_set_text(s_time_layer2, s_time_buffer_utc);
 
     strftime(s_time_buffer_bkk, sizeof(s_time_buffer_bkk), "%H:%M", &bkk_tm);
-    text_layer_set_text(s_name_layer2, TZ_NAMES[1]);
-    text_layer_set_text(s_time_layer2, s_time_buffer_bkk);
+    text_layer_set_text(s_name_layer3, TZ_NAMES[2]);
+    text_layer_set_text(s_time_layer3, s_time_buffer_bkk);
 }
 
 static void tick_minute_handler(struct tm *tick_time, TimeUnits units_changed) {
-    update_time();
+  update_time();
 }
 
 static void apply_style(TextLayer* t) {
@@ -57,13 +76,21 @@ static void main_window_load(Window *window) {
     Layer *window_layer = window_get_root_layer(window);
     GRect bounds = layer_get_bounds(window_layer);
 
-    s_name_layer1 = text_layer_create(GRect(0, 0, TZ_VALUE_X_POS - X_PADDING, LINE_HEIGHT));
-    s_time_layer1 = text_layer_create(GRect(TZ_VALUE_X_POS, 0, bounds.size.w - TZ_VALUE_X_POS, LINE_HEIGHT));
+    const int name_width = TZ_VALUE_X_POS - X_PADDING;
+    s_name_layer1 = text_layer_create(GRect(
+        0, 0 * (LINE_HEIGHT + Y_PADDING), name_width, LINE_HEIGHT));
+    s_time_layer1 = text_layer_create(GRect(
+        TZ_VALUE_X_POS, 0 * (LINE_HEIGHT + Y_PADDING), bounds.size.w - TZ_VALUE_X_POS, LINE_HEIGHT));
 
     s_name_layer2 = text_layer_create(GRect(
-        0, LINE_HEIGHT + Y_PADDING, TZ_VALUE_X_POS - X_PADDING, LINE_HEIGHT));
+        0, 1 * (LINE_HEIGHT + Y_PADDING), name_width, LINE_HEIGHT));
     s_time_layer2 = text_layer_create(GRect(
-        TZ_VALUE_X_POS, LINE_HEIGHT + Y_PADDING, bounds.size.w - TZ_VALUE_X_POS, LINE_HEIGHT));
+        TZ_VALUE_X_POS, 1 * (LINE_HEIGHT + Y_PADDING), bounds.size.w - TZ_VALUE_X_POS, LINE_HEIGHT));
+
+    s_name_layer3 = text_layer_create(GRect(
+        0, 2 * (LINE_HEIGHT + Y_PADDING), name_width, LINE_HEIGHT));
+    s_time_layer3 = text_layer_create(GRect(
+        TZ_VALUE_X_POS, 2 * (LINE_HEIGHT + Y_PADDING), bounds.size.w - TZ_VALUE_X_POS, LINE_HEIGHT));
 
     apply_style(s_name_layer1);
     text_layer_set_text_alignment(s_name_layer1, GTextAlignmentRight);
@@ -77,10 +104,18 @@ static void main_window_load(Window *window) {
     apply_style(s_time_layer2);
     text_layer_set_text_alignment(s_time_layer2, GTextAlignmentLeft);
 
+    apply_style(s_name_layer3);
+    text_layer_set_text_alignment(s_name_layer3, GTextAlignmentRight);
+
+    apply_style(s_time_layer3);
+    text_layer_set_text_alignment(s_time_layer3, GTextAlignmentLeft);
+
     layer_add_child(window_layer, text_layer_get_layer(s_name_layer1));
     layer_add_child(window_layer, text_layer_get_layer(s_time_layer1));
     layer_add_child(window_layer, text_layer_get_layer(s_name_layer2));
     layer_add_child(window_layer, text_layer_get_layer(s_time_layer2));
+    layer_add_child(window_layer, text_layer_get_layer(s_name_layer3));
+    layer_add_child(window_layer, text_layer_get_layer(s_time_layer3));
 }
 
 static void main_window_unload(Window *window) {
@@ -88,6 +123,8 @@ static void main_window_unload(Window *window) {
     text_layer_destroy(s_time_layer1);
     text_layer_destroy(s_name_layer2);
     text_layer_destroy(s_time_layer2);
+    text_layer_destroy(s_name_layer3);
+    text_layer_destroy(s_time_layer3);
 }
 
 static void init() {
