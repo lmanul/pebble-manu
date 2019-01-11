@@ -1,6 +1,6 @@
 #include <pebble.h>
 
-#define TZ_COUNT 3
+#define TZ_COUNT 5
 
 static Window *s_main_window;
 static TextLayer *s_name_layers[TZ_COUNT];
