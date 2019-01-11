@@ -32,10 +32,10 @@ static void update_time() {
   time_t current_time = time(NULL);
   struct tm utc_tm = *gmtime(&current_time);
 
-  char display_date[15];
-  //get_display_date(utc_tm, display_date);
-  strftime(display_date, sizeof(display_date), "%a %e %b", &utc_tm);
-  text_layer_set_text(date_layer, display_date);
+  // char display_date[20];
+  //strftime(display_date, sizeof(display_date), "%a %e %b", &utc_tm);
+  //text_layer_set_text(date_layer, display_date);
+  text_layer_set_text(date_layer, "Date coming soon");
 
   struct tm local_times[TZ_COUNT];
   static char s_time_buffers[TZ_COUNT][8];
@@ -64,7 +64,7 @@ static void main_window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
 
-  date_layer = text_layer_create(GRect(0, 0, bounds.size.w, 18));
+  date_layer = text_layer_create(GRect(0, 0, bounds.size.w, 24));
   text_layer_set_background_color(date_layer, GColorWhite);
   text_layer_set_text_color(date_layer, GColorBlack);
   text_layer_set_font(date_layer,
