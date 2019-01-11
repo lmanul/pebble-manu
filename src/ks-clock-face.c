@@ -90,25 +90,25 @@ static void main_window_unload(Window *window) {
 }
 
 static void init() {
-    APP_LOG(APP_LOG_LEVEL_INFO, "init");
+  APP_LOG(APP_LOG_LEVEL_INFO, "init");
 
-    // Create main Window element and assign to pointer
-    s_main_window = window_create();
+  // Create main Window element and assign to pointer
+  s_main_window = window_create();
 
-    // Set handlers to manage the elements inside the Window
-    window_set_window_handlers(s_main_window, (WindowHandlers) {
-        .load = main_window_load,
-        .unload = main_window_unload
-    });
+  // Set handlers to manage the elements inside the Window
+  window_set_window_handlers(s_main_window, (WindowHandlers) {
+      .load = main_window_load,
+      .unload = main_window_unload
+  });
 
-    // Show the Window on the watch, with animated=true
-    window_stack_push(s_main_window, true);
+  // Show the Window on the watch, with animated=true
+  window_stack_push(s_main_window, true);
 
-    // Make sure the time is displayed from the start
-    update_time();
+  // Make sure the time is displayed from the start
+  update_time();
 
-    // Register with TickTimerService
-    tick_timer_service_subscribe(MINUTE_UNIT, tick_minute_handler);
+  // Register with TickTimerService
+  tick_timer_service_subscribe(MINUTE_UNIT, tick_minute_handler);
 }
 
 static void deinit() {
