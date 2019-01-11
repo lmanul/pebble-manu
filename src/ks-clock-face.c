@@ -1,14 +1,10 @@
 #include <pebble.h>
 
-#define TZ_COUNT 1
+#define TZ_COUNT 5
 
 static Window *s_main_window;
-static TextLayer *s_name_layer1;
-static TextLayer *s_time_layer1;
-static TextLayer *s_name_layer2;
-static TextLayer *s_time_layer2;
-static TextLayer *s_name_layer3;
-static TextLayer *s_time_layer3;
+static TextLayer *s_name_layers[TZ_COUNT];
+static TextLayer *s_time_layers[TZ_COUNT];
 
 const int LINE_HEIGHT = 30;
 const int X_PADDING = 6;
@@ -23,8 +19,6 @@ static void update_time() {
     struct tm *utc_tm = gmtime(&current_time);
     const int utc_hour = utc_tm->tm_hour;
     const int utc_min  = utc_tm->tm_min;
-
-    // TODO: arrays!
 
     struct tm sfo_tm;
     sfo_tm.tm_min = utc_min;
@@ -51,16 +45,16 @@ static void update_time() {
     static char s_time_buffer_bkk[8];
 
     strftime(s_time_buffer_sfo, sizeof(s_time_buffer_sfo), "%H:%M", &sfo_tm);
-    text_layer_set_text(s_name_layer1, TZ_NAMES[0]);
-    text_layer_set_text(s_time_layer1, s_time_buffer_sfo);
+    text_layer_set_text(s_name_layers[0], TZ_NAMES[0]);
+    text_layer_set_text(s_time_layers[0], s_time_buffer_sfo);
 
     strftime(s_time_buffer_utc, sizeof(s_time_buffer_utc), "%H:%M", utc_tm);
-    text_layer_set_text(s_name_layer2, TZ_NAMES[1]);
-    text_layer_set_text(s_time_layer2, s_time_buffer_utc);
+    text_layer_set_text(s_name_layers[1], TZ_NAMES[1]);
+    text_layer_set_text(s_time_layers[1], s_time_buffer_utc);
 
     strftime(s_time_buffer_bkk, sizeof(s_time_buffer_bkk), "%H:%M", &bkk_tm);
-    text_layer_set_text(s_name_layer3, TZ_NAMES[2]);
-    text_layer_set_text(s_time_layer3, s_time_buffer_bkk);
+    text_layer_set_text(s_name_layers[2], TZ_NAMES[2]);
+    text_layer_set_text(s_time_layers[2], s_time_buffer_bkk);
 }
 
 static void tick_minute_handler(struct tm *tick_time, TimeUnits units_changed) {
@@ -79,54 +73,54 @@ static void main_window_load(Window *window) {
     GRect bounds = layer_get_bounds(window_layer);
 
     const int name_width = TZ_VALUE_X_POS - X_PADDING;
-    s_name_layer1 = text_layer_create(GRect(
+    s_name_layers[0] = text_layer_create(GRect(
         0, 0 * (LINE_HEIGHT + Y_PADDING), name_width, LINE_HEIGHT));
-    s_time_layer1 = text_layer_create(GRect(
+    s_time_layers[0] = text_layer_create(GRect(
         TZ_VALUE_X_POS, 0 * (LINE_HEIGHT + Y_PADDING), bounds.size.w - TZ_VALUE_X_POS, LINE_HEIGHT));
 
-    s_name_layer2 = text_layer_create(GRect(
+    s_name_layers[1] = text_layer_create(GRect(
         0, 1 * (LINE_HEIGHT + Y_PADDING), name_width, LINE_HEIGHT));
-    s_time_layer2 = text_layer_create(GRect(
+    s_time_layers[1] = text_layer_create(GRect(
         TZ_VALUE_X_POS, 1 * (LINE_HEIGHT + Y_PADDING), bounds.size.w - TZ_VALUE_X_POS, LINE_HEIGHT));
 
-    s_name_layer3 = text_layer_create(GRect(
+    s_name_layers[2] = text_layer_create(GRect(
         0, 2 * (LINE_HEIGHT + Y_PADDING), name_width, LINE_HEIGHT));
-    s_time_layer3 = text_layer_create(GRect(
+    s_time_layers[2] = text_layer_create(GRect(
         TZ_VALUE_X_POS, 2 * (LINE_HEIGHT + Y_PADDING), bounds.size.w - TZ_VALUE_X_POS, LINE_HEIGHT));
 
-    apply_style(s_name_layer1);
-    text_layer_set_text_alignment(s_name_layer1, GTextAlignmentRight);
+    apply_style(s_name_layers[0]);
+    text_layer_set_text_alignment(s_name_layers[0], GTextAlignmentRight);
 
-    apply_style(s_time_layer1);
-    text_layer_set_text_alignment(s_time_layer1, GTextAlignmentLeft);
+    apply_style(s_time_layers[0]);
+    text_layer_set_text_alignment(s_time_layers[0], GTextAlignmentLeft);
 
-    apply_style(s_name_layer2);
-    text_layer_set_text_alignment(s_name_layer2, GTextAlignmentRight);
+    apply_style(s_name_layers[1]);
+    text_layer_set_text_alignment(s_name_layers[1], GTextAlignmentRight);
 
-    apply_style(s_time_layer2);
-    text_layer_set_text_alignment(s_time_layer2, GTextAlignmentLeft);
+    apply_style(s_time_layers[1]);
+    text_layer_set_text_alignment(s_time_layers[1], GTextAlignmentLeft);
 
-    apply_style(s_name_layer3);
-    text_layer_set_text_alignment(s_name_layer3, GTextAlignmentRight);
+    apply_style(s_name_layers[2]);
+    text_layer_set_text_alignment(s_name_layers[2], GTextAlignmentRight);
 
-    apply_style(s_time_layer3);
-    text_layer_set_text_alignment(s_time_layer3, GTextAlignmentLeft);
+    apply_style(s_time_layers[2]);
+    text_layer_set_text_alignment(s_time_layers[2], GTextAlignmentLeft);
 
-    layer_add_child(window_layer, text_layer_get_layer(s_name_layer1));
-    layer_add_child(window_layer, text_layer_get_layer(s_time_layer1));
-    layer_add_child(window_layer, text_layer_get_layer(s_name_layer2));
-    layer_add_child(window_layer, text_layer_get_layer(s_time_layer2));
-    layer_add_child(window_layer, text_layer_get_layer(s_name_layer3));
-    layer_add_child(window_layer, text_layer_get_layer(s_time_layer3));
+    layer_add_child(window_layer, text_layer_get_layer(s_name_layers[0]));
+    layer_add_child(window_layer, text_layer_get_layer(s_time_layers[0]));
+    layer_add_child(window_layer, text_layer_get_layer(s_name_layers[1]));
+    layer_add_child(window_layer, text_layer_get_layer(s_time_layers[1]));
+    layer_add_child(window_layer, text_layer_get_layer(s_name_layers[2]));
+    layer_add_child(window_layer, text_layer_get_layer(s_time_layers[2]));
 }
 
 static void main_window_unload(Window *window) {
-    text_layer_destroy(s_name_layer1);
-    text_layer_destroy(s_time_layer1);
-    text_layer_destroy(s_name_layer2);
-    text_layer_destroy(s_time_layer2);
-    text_layer_destroy(s_name_layer3);
-    text_layer_destroy(s_time_layer3);
+    text_layer_destroy(s_name_layers[0]);
+    text_layer_destroy(s_time_layers[0]);
+    text_layer_destroy(s_name_layers[1]);
+    text_layer_destroy(s_time_layers[1]);
+    text_layer_destroy(s_name_layers[2]);
+    text_layer_destroy(s_time_layers[2]);
 }
 
 static void init() {
