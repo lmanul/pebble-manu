@@ -9,7 +9,7 @@ static TextLayer *s_time_layers[TZ_COUNT];
 const int LINE_HEIGHT = 30;
 const int X_PADDING = 6;
 const int Y_PADDING = 2;
-const int TZ_VALUE_X_POS = 80;
+const int TZ_VALUE_X_POS = 70;
 
 //                         0      1      2      3      4
 const char* TZ_NAMES[] = {"SFO", "NYC", "UTC", "BKK", "TOK"};
@@ -33,8 +33,6 @@ static struct tm get_local_time(struct tm utc_tm, int tz_offset) {
 static void update_time() {
     time_t current_time = time(NULL);
     struct tm utc_tm = *gmtime(&current_time);
-    const int utc_hour = utc_tm.tm_hour;
-    const int utc_min  = utc_tm.tm_min;
 
     struct tm local_times[TZ_COUNT];
     static char s_time_buffers[TZ_COUNT][8];
@@ -51,10 +49,11 @@ static void tick_minute_handler(struct tm *tick_time, TimeUnits units_changed) {
   update_time();
 }
 
-static void apply_style(TextLayer* t) {
+static void apply_style(TextLayer* t, bool bold) {
   text_layer_set_background_color(t, GColorWhite);
   text_layer_set_text_color(t, GColorBlack);
-  text_layer_set_font(t, fonts_get_system_font(FONT_KEY_GOTHIC_28));
+  text_layer_set_font(t, fonts_get_system_font(
+      bold ? FONT_KEY_GOTHIC_28_BOLD : FONT_KEY_GOTHIC_28));
 }
 
 static void main_window_load(Window *window) {
@@ -72,10 +71,10 @@ static void main_window_load(Window *window) {
   }
 
   for (int i = 0; i < TZ_COUNT; i++) {
-    apply_style(s_name_layers[i]);
+    apply_style(s_name_layers[i], i == 2 /* bold */);
     text_layer_set_text_alignment(s_name_layers[i], GTextAlignmentRight);
 
-    apply_style(s_time_layers[i]);
+    apply_style(s_time_layers[i], i == 2 /* bold */);
     text_layer_set_text_alignment(s_time_layers[i], GTextAlignmentLeft);
 
     layer_add_child(window_layer, text_layer_get_layer(s_name_layers[i]));
