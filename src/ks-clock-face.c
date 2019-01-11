@@ -3,10 +3,12 @@
 #define TZ_COUNT 5
 
 static Window *s_main_window;
-static TextLayer *s_name_layers[TZ_COUNT];
-static TextLayer *s_time_layers[TZ_COUNT];
+static TextLayer *name_layers[TZ_COUNT];
+static TextLayer *time_layers[TZ_COUNT];
+static TextLayer *date_layer;
 
-const int LINE_HEIGHT = 30;
+const int FIRST_TIME_TOP_OFFSET = 22;
+const int LINE_HEIGHT = 28;
 const int X_PADDING = 6;
 const int Y_PADDING = 0;
 const int TZ_VALUE_X_POS = 70;
@@ -17,6 +19,92 @@ const int TZ_OFFSETS[] = {-8,    -5,    0,     7,     9};
 
 int get_day_offset(struct tm utc_tm, int tz_offset) {
   return 0;
+}
+
+void reverse(char *s) {
+  char tmp, *p;
+  p = s + strlen(s) - 1;
+  while (p > s) {
+      tmp = *s;
+      *s++ = *p;
+      *p-- = tmp;
+  }
+}
+
+void itoa(int n, char *s) {
+  int sign;
+  char *p;
+    
+  p = s;
+  sign = n;
+  do {
+    *p++ = abs(n % 10) + '0';
+  } while (n /= 10);
+  if (sign < 0)
+      *p++ = '-';
+  *p = '\0';
+  reverse(s);
+}
+
+static char* get_weekday(int index) {
+  switch(index) {
+    case 0:
+      return "Sun";
+    case 1:
+      return "Mon";
+    case 2:
+      return "Tue";
+    case 3:
+      return "Wed";
+    case 4:
+      return "Thu";
+    case 5:
+      return "Fri";
+    case 6:
+      return "Sat";
+  }
+  return "?";
+}
+
+static char* get_month(int index) {
+  switch(index) {
+    case 0:
+      return "Jan";
+    case 1:
+      return "Feb";
+    case 2:
+      return "Mar";
+    case 3:
+      return "Apr";
+    case 4:
+      return "May";
+    case 5:
+      return "Jun";
+    case 6:
+      return "Jul";
+    case 7:
+      return "Aug";
+    case 8:
+      return "Sep";
+    case 9:
+      return "Oct";
+    case 10:
+      return "Nov";
+    case 11:
+      return "Dec";
+  }
+  return "?";
+}
+
+static char* get_display_date(struct tm utc_tm, char* out) {
+  strcat(out, get_weekday(utc_tm.tm_wday));
+  strcat(out, " ");
+  char day_of_month[3];
+  itoa(utc_tm.tm_mday, day_of_month);
+  strcat(out, day_of_month);
+  strcat(out, " ");
+  strcat(out, get_month(utc_tm.tm_mon));
+  return out;
 }
 
 static struct tm get_local_time(struct tm utc_tm, int tz_offset) {
@@ -40,8 +128,8 @@ static void update_time() {
   for (int i = 0; i < TZ_COUNT; i++) {
     local_times[i] = get_local_time(utc_tm, TZ_OFFSETS[i]);
     strftime(s_time_buffers[i], sizeof(s_time_buffers[0]), "%H:%M", &local_times[i]);
-    text_layer_set_text(s_name_layers[i], TZ_NAMES[i]);
-    text_layer_set_text(s_time_layers[i], s_time_buffers[i]);
+    text_layer_set_text(name_layers[i], TZ_NAMES[i]);
+    text_layer_set_text(time_layers[i], s_time_buffers[i]);
   }
 }
 
@@ -64,28 +152,28 @@ static void main_window_load(Window *window) {
   const int name_width = TZ_VALUE_X_POS - X_PADDING;
 
   for (int i = 0; i < TZ_COUNT; i++) {
-    s_name_layers[i] = text_layer_create(GRect(
-        0, i * (LINE_HEIGHT + Y_PADDING), name_width, LINE_HEIGHT));
-    s_time_layers[i] = text_layer_create(GRect(
-        TZ_VALUE_X_POS, i * (LINE_HEIGHT + Y_PADDING), bounds.size.w - TZ_VALUE_X_POS, LINE_HEIGHT));
+    name_layers[i] = text_layer_create(GRect(
+        0, FIRST_TIME_TOP_OFFSET + i * (LINE_HEIGHT + Y_PADDING), name_width, LINE_HEIGHT));
+    time_layers[i] = text_layer_create(GRect(
+        TZ_VALUE_X_POS, FIRST_TIME_TOP_OFFSET + i * (LINE_HEIGHT + Y_PADDING), bounds.size.w - TZ_VALUE_X_POS, LINE_HEIGHT));
   }
 
   for (int i = 0; i < TZ_COUNT; i++) {
-    apply_style(s_name_layers[i], i == 2 /* bold */);
-    text_layer_set_text_alignment(s_name_layers[i], GTextAlignmentRight);
+    apply_style(name_layers[i], i == 2 /* bold */);
+    text_layer_set_text_alignment(name_layers[i], GTextAlignmentRight);
 
-    apply_style(s_time_layers[i], i == 2 /* bold */);
-    text_layer_set_text_alignment(s_time_layers[i], GTextAlignmentLeft);
+    apply_style(time_layers[i], i == 2 /* bold */);
+    text_layer_set_text_alignment(time_layers[i], GTextAlignmentLeft);
 
-    layer_add_child(window_layer, text_layer_get_layer(s_name_layers[i]));
-    layer_add_child(window_layer, text_layer_get_layer(s_time_layers[i]));
+    layer_add_child(window_layer, text_layer_get_layer(name_layers[i]));
+    layer_add_child(window_layer, text_layer_get_layer(time_layers[i]));
   }
 }
 
 static void main_window_unload(Window *window) {
     for (int i = 0; i < TZ_COUNT; i++) {
-      text_layer_destroy(s_name_layers[i]);
-      text_layer_destroy(s_time_layers[i]);
+      text_layer_destroy(name_layers[i]);
+      text_layer_destroy(time_layers[i]);
   }
 }
 
