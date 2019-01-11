@@ -17,96 +17,6 @@ const int TZ_VALUE_X_POS = 70;
 const char* TZ_NAMES[] = {"SFO", "NYC", "UTC", "BKK", "TOK"};
 const int TZ_OFFSETS[] = {-8,    -5,    0,     7,     9};
 
-int get_day_offset(struct tm utc_tm, int tz_offset) {
-  return 0;
-}
-
-void reverse(char *s) {
-  char tmp, *p;
-  p = s + strlen(s) - 1;
-  while (p > s) {
-      tmp = *s;
-      *s++ = *p;
-      *p-- = tmp;
-  }
-}
-
-void itoa(int n, char *s) {
-  int sign;
-  char *p;
-    
-  p = s;
-  sign = n;
-  do {
-    *p++ = abs(n % 10) + '0';
-  } while (n /= 10);
-  if (sign < 0)
-      *p++ = '-';
-  *p = '\0';
-  reverse(s);
-}
-
-static char* get_weekday(int index) {
-  switch(index) {
-    case 0:
-      return "Sun";
-    case 1:
-      return "Mon";
-    case 2:
-      return "Tue";
-    case 3:
-      return "Wed";
-    case 4:
-      return "Thu";
-    case 5:
-      return "Fri";
-    case 6:
-      return "Sat";
-  }
-  return "?";
-}
-
-static char* get_month(int index) {
-  switch(index) {
-    case 0:
-      return "Jan";
-    case 1:
-      return "Feb";
-    case 2:
-      return "Mar";
-    case 3:
-      return "Apr";
-    case 4:
-      return "May";
-    case 5:
-      return "Jun";
-    case 6:
-      return "Jul";
-    case 7:
-      return "Aug";
-    case 8:
-      return "Sep";
-    case 9:
-      return "Oct";
-    case 10:
-      return "Nov";
-    case 11:
-      return "Dec";
-  }
-  return "?";
-}
-
-static char* get_display_date(struct tm utc_tm, char* out) {
-  strcat(out, get_weekday(utc_tm.tm_wday));
-  strcat(out, " ");
-  char day_of_month[3];
-  itoa(utc_tm.tm_mday, day_of_month);
-  strcat(out, day_of_month);
-  strcat(out, " ");
-  strcat(out, get_month(utc_tm.tm_mon));
-  return out;
-}
-
 static struct tm get_local_time(struct tm utc_tm, int tz_offset) {
   struct tm target;
   target.tm_min = utc_tm.tm_min;
@@ -121,6 +31,11 @@ static struct tm get_local_time(struct tm utc_tm, int tz_offset) {
 static void update_time() {
   time_t current_time = time(NULL);
   struct tm utc_tm = *gmtime(&current_time);
+
+  char display_date[15];
+  //get_display_date(utc_tm, display_date);
+  strftime(display_date, sizeof(display_date), "%a %e %b", &utc_tm);
+  text_layer_set_text(date_layer, display_date);
 
   struct tm local_times[TZ_COUNT];
   static char s_time_buffers[TZ_COUNT][8];
@@ -149,6 +64,14 @@ static void main_window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
 
+  date_layer = text_layer_create(GRect(0, 0, bounds.size.w, 18));
+  text_layer_set_background_color(date_layer, GColorWhite);
+  text_layer_set_text_color(date_layer, GColorBlack);
+  text_layer_set_font(date_layer,
+    fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
+  text_layer_set_text_alignment(date_layer, GTextAlignmentCenter);
+  layer_add_child(window_layer, text_layer_get_layer(date_layer));
+
   const int name_width = TZ_VALUE_X_POS - X_PADDING;
 
   for (int i = 0; i < TZ_COUNT; i++) {
@@ -171,9 +94,10 @@ static void main_window_load(Window *window) {
 }
 
 static void main_window_unload(Window *window) {
-    for (int i = 0; i < TZ_COUNT; i++) {
-      text_layer_destroy(name_layers[i]);
-      text_layer_destroy(time_layers[i]);
+  text_layer_destroy(date_layer);
+  for (int i = 0; i < TZ_COUNT; i++) {
+    text_layer_destroy(name_layers[i]);
+    text_layer_destroy(time_layers[i]);
   }
 }
 
