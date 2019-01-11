@@ -14,22 +14,32 @@ const int Y_PADDING = 2;
 const int TZ_VALUE_X_POS = 80;
 
 const char* TZ_NAMES[] = {"UTC", "BKK", "UTC-3", "UTC-4", "UTC-5"};
-const int TZ_OFFSETS[] = {0, 7};
+const int TZ_OFFSETS[] = {0, 7, 0, 0, 0};
 
 static void update_time() {
     time_t current_time = time(NULL);
     struct tm *utc_tm = gmtime(&current_time);
-    struct tm *bkk_tm = localtime(&current_time);
+    const int utc_hour = utc_tm->tm_hour;
+    const int utc_min  = utc_tm->tm_min;
 
-    static char s_hours_buffer[8];
+    struct tm bkk_tm;
+    bkk_tm.tm_min = utc_min;
+    if (utc_hour < 24 - TZ_OFFSETS[1]) {
+      bkk_tm.tm_hour = utc_hour + TZ_OFFSETS[1];
+    } else {
+      bkk_tm.tm_hour = (utc_hour + TZ_OFFSETS[1]) % 24;
+    }
 
-    strftime(s_hours_buffer, sizeof(s_hours_buffer), "%H:%M", utc_tm);
+    static char s_time_buffer_utc[8];
+    static char s_time_buffer_bkk[8];
+
+    strftime(s_time_buffer_utc, sizeof(s_time_buffer_utc), "%H:%M", utc_tm);
     text_layer_set_text(s_name_layer1, TZ_NAMES[0]);
-    text_layer_set_text(s_time_layer1, s_hours_buffer);
+    text_layer_set_text(s_time_layer1, s_time_buffer_utc);
 
-    strftime(s_hours_buffer, sizeof(s_hours_buffer), "%H:%M", bkk_tm);
+    strftime(s_time_buffer_bkk, sizeof(s_time_buffer_bkk), "%H:%M", &bkk_tm);
     text_layer_set_text(s_name_layer2, TZ_NAMES[1]);
-    text_layer_set_text(s_time_layer2, s_hours_buffer);
+    text_layer_set_text(s_time_layer2, s_time_buffer_bkk);
 }
 
 static void tick_minute_handler(struct tm *tick_time, TimeUnits units_changed) {
