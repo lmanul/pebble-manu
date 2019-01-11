@@ -15,8 +15,8 @@ const int X_PADDING = 6;
 const int Y_PADDING = 2;
 const int TZ_VALUE_X_POS = 80;
 
-const char* TZ_NAMES[] = {"SFO", "UTC", "BKK", "UTC-3", "UTC-4"};
-const int TZ_OFFSETS[] = {-8, 0, 7, 0, 0};
+const char* TZ_NAMES[] = {"SFO", "NYC", "UTC", "BKK", "TOK"};
+const int TZ_OFFSETS[] = {-8, -5, 0, 7, 9};
 
 static void update_time() {
     time_t current_time = time(NULL);
@@ -34,14 +34,16 @@ static void update_time() {
       sfo_tm.tm_hour = (utc_hour + TZ_OFFSETS[0]) % 24;
     }
 
+    // TODO: NYC
+
     // UTC time: no offset.
 
     struct tm bkk_tm;
     bkk_tm.tm_min = utc_min;
-    if (utc_hour < 24 - TZ_OFFSETS[2]) {
-      bkk_tm.tm_hour = utc_hour + TZ_OFFSETS[2];
+    if (utc_hour < 24 - TZ_OFFSETS[3]) {
+      bkk_tm.tm_hour = utc_hour + TZ_OFFSETS[3];
     } else {
-      bkk_tm.tm_hour = (utc_hour + TZ_OFFSETS[2]) % 24;
+      bkk_tm.tm_hour = (utc_hour + TZ_OFFSETS[3]) % 24;
     }
 
     static char s_time_buffer_sfo[8];
