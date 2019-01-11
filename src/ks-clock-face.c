@@ -22,7 +22,11 @@ int get_day_offset(struct tm utc_tm, int tz_offset) {
 static struct tm get_local_time(struct tm utc_tm, int tz_offset) {
   struct tm target;
   target.tm_min = utc_tm.tm_min;
-  target.tm_hour = (utc_tm.tm_hour + tz_offset) % 24;
+  int offset_time = utc_tm.tm_hour + tz_offset;
+  if (offset_time < 0) {
+    offset_time += 24;
+  }
+  target.tm_hour = offset_time % 24;
   return target;
 }
 
@@ -32,27 +36,15 @@ static void update_time() {
     const int utc_hour = utc_tm.tm_hour;
     const int utc_min  = utc_tm.tm_min;
 
-    struct tm sfo_tm = get_local_time(utc_tm, TZ_OFFSETS[0]);
-
-    // TODO: NYC
-
-    // UTC time: no offset.
-
-    struct tm bkk_tm = get_local_time(utc_tm, TZ_OFFSETS[3]);
-
+    struct tm local_times[TZ_COUNT];
     static char s_time_buffers[TZ_COUNT][8];
 
-    strftime(s_time_buffers[0], sizeof(s_time_buffers[0]), "%H:%M", &sfo_tm);
-    text_layer_set_text(s_name_layers[0], TZ_NAMES[0]);
-    text_layer_set_text(s_time_layers[0], s_time_buffers[0]);
-
-    strftime(s_time_buffers[1], sizeof(s_time_buffers[1]), "%H:%M", &utc_tm);
-    text_layer_set_text(s_name_layers[1], TZ_NAMES[1]);
-    text_layer_set_text(s_time_layers[1], s_time_buffers[1]);
-
-    strftime(s_time_buffers[2], sizeof(s_time_buffers[2]), "%H:%M", &bkk_tm);
-    text_layer_set_text(s_name_layers[2], TZ_NAMES[3]);
-    text_layer_set_text(s_time_layers[2], s_time_buffers[2]);
+    for (int i = 0; i < TZ_COUNT; i++) {
+      local_times[i] = get_local_time(utc_tm, TZ_OFFSETS[i]);
+      strftime(s_time_buffers[i], sizeof(s_time_buffers[0]), "%H:%M", &local_times[i]);
+      text_layer_set_text(s_name_layers[i], TZ_NAMES[i]);
+      text_layer_set_text(s_time_layers[i], s_time_buffers[i]);
+    }
 }
 
 static void tick_minute_handler(struct tm *tick_time, TimeUnits units_changed) {
