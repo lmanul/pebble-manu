@@ -1,6 +1,6 @@
 #include <pebble.h>
 
-#define TZ_COUNT 5
+#define TZ_COUNT 3
 
 static Window *s_main_window;
 static TextLayer *s_name_layers[TZ_COUNT];
@@ -40,21 +40,19 @@ static void update_time() {
       bkk_tm.tm_hour = (utc_hour + TZ_OFFSETS[3]) % 24;
     }
 
-    static char s_time_buffer_sfo[8];
-    static char s_time_buffer_utc[8];
-    static char s_time_buffer_bkk[8];
+    static char s_time_buffers[TZ_COUNT][8];
 
-    strftime(s_time_buffer_sfo, sizeof(s_time_buffer_sfo), "%H:%M", &sfo_tm);
+    strftime(s_time_buffers[0], sizeof(s_time_buffers[0]), "%H:%M", &sfo_tm);
     text_layer_set_text(s_name_layers[0], TZ_NAMES[0]);
-    text_layer_set_text(s_time_layers[0], s_time_buffer_sfo);
+    text_layer_set_text(s_time_layers[0], s_time_buffers[0]);
 
-    strftime(s_time_buffer_utc, sizeof(s_time_buffer_utc), "%H:%M", utc_tm);
+    strftime(s_time_buffers[1], sizeof(s_time_buffers[1]), "%H:%M", utc_tm);
     text_layer_set_text(s_name_layers[1], TZ_NAMES[1]);
-    text_layer_set_text(s_time_layers[1], s_time_buffer_utc);
+    text_layer_set_text(s_time_layers[1], s_time_buffers[1]);
 
-    strftime(s_time_buffer_bkk, sizeof(s_time_buffer_bkk), "%H:%M", &bkk_tm);
+    strftime(s_time_buffers[2], sizeof(s_time_buffers[2]), "%H:%M", &bkk_tm);
     text_layer_set_text(s_name_layers[2], TZ_NAMES[2]);
-    text_layer_set_text(s_time_layers[2], s_time_buffer_bkk);
+    text_layer_set_text(s_time_layers[2], s_time_buffers[2]);
 }
 
 static void tick_minute_handler(struct tm *tick_time, TimeUnits units_changed) {
@@ -88,39 +86,25 @@ static void main_window_load(Window *window) {
     s_time_layers[2] = text_layer_create(GRect(
         TZ_VALUE_X_POS, 2 * (LINE_HEIGHT + Y_PADDING), bounds.size.w - TZ_VALUE_X_POS, LINE_HEIGHT));
 
-    apply_style(s_name_layers[0]);
-    text_layer_set_text_alignment(s_name_layers[0], GTextAlignmentRight);
+    for (int i = 0; i < TZ_COUNT; i++) {
+      apply_style(s_name_layers[i]);
+      text_layer_set_text_alignment(s_name_layers[i], GTextAlignmentRight);
 
-    apply_style(s_time_layers[0]);
-    text_layer_set_text_alignment(s_time_layers[0], GTextAlignmentLeft);
+      apply_style(s_time_layers[i]);
+      text_layer_set_text_alignment(s_time_layers[i], GTextAlignmentLeft);
+    }
 
-    apply_style(s_name_layers[1]);
-    text_layer_set_text_alignment(s_name_layers[1], GTextAlignmentRight);
-
-    apply_style(s_time_layers[1]);
-    text_layer_set_text_alignment(s_time_layers[1], GTextAlignmentLeft);
-
-    apply_style(s_name_layers[2]);
-    text_layer_set_text_alignment(s_name_layers[2], GTextAlignmentRight);
-
-    apply_style(s_time_layers[2]);
-    text_layer_set_text_alignment(s_time_layers[2], GTextAlignmentLeft);
-
-    layer_add_child(window_layer, text_layer_get_layer(s_name_layers[0]));
-    layer_add_child(window_layer, text_layer_get_layer(s_time_layers[0]));
-    layer_add_child(window_layer, text_layer_get_layer(s_name_layers[1]));
-    layer_add_child(window_layer, text_layer_get_layer(s_time_layers[1]));
-    layer_add_child(window_layer, text_layer_get_layer(s_name_layers[2]));
-    layer_add_child(window_layer, text_layer_get_layer(s_time_layers[2]));
+    for (int i = 0; i < TZ_COUNT; i++) {
+      layer_add_child(window_layer, text_layer_get_layer(s_name_layers[i]));
+      layer_add_child(window_layer, text_layer_get_layer(s_time_layers[i]));
+    }
 }
 
 static void main_window_unload(Window *window) {
-    text_layer_destroy(s_name_layers[0]);
-    text_layer_destroy(s_time_layers[0]);
-    text_layer_destroy(s_name_layers[1]);
-    text_layer_destroy(s_time_layers[1]);
-    text_layer_destroy(s_name_layers[2]);
-    text_layer_destroy(s_time_layers[2]);
+    for (int i = 0; i < TZ_COUNT; i++) {
+      text_layer_destroy(s_name_layers[i]);
+      text_layer_destroy(s_time_layers[i]);
+  }
 }
 
 static void init() {
