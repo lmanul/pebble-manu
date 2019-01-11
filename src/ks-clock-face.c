@@ -8,7 +8,7 @@ static TextLayer *s_time_layers[TZ_COUNT];
 
 const int LINE_HEIGHT = 30;
 const int X_PADDING = 6;
-const int Y_PADDING = 2;
+const int Y_PADDING = 0;
 const int TZ_VALUE_X_POS = 70;
 
 //                         0      1      2      3      4
@@ -31,18 +31,18 @@ static struct tm get_local_time(struct tm utc_tm, int tz_offset) {
 }
 
 static void update_time() {
-    time_t current_time = time(NULL);
-    struct tm utc_tm = *gmtime(&current_time);
+  time_t current_time = time(NULL);
+  struct tm utc_tm = *gmtime(&current_time);
 
-    struct tm local_times[TZ_COUNT];
-    static char s_time_buffers[TZ_COUNT][8];
+  struct tm local_times[TZ_COUNT];
+  static char s_time_buffers[TZ_COUNT][8];
 
-    for (int i = 0; i < TZ_COUNT; i++) {
-      local_times[i] = get_local_time(utc_tm, TZ_OFFSETS[i]);
-      strftime(s_time_buffers[i], sizeof(s_time_buffers[0]), "%H:%M", &local_times[i]);
-      text_layer_set_text(s_name_layers[i], TZ_NAMES[i]);
-      text_layer_set_text(s_time_layers[i], s_time_buffers[i]);
-    }
+  for (int i = 0; i < TZ_COUNT; i++) {
+    local_times[i] = get_local_time(utc_tm, TZ_OFFSETS[i]);
+    strftime(s_time_buffers[i], sizeof(s_time_buffers[0]), "%H:%M", &local_times[i]);
+    text_layer_set_text(s_name_layers[i], TZ_NAMES[i]);
+    text_layer_set_text(s_time_layers[i], s_time_buffers[i]);
+  }
 }
 
 static void tick_minute_handler(struct tm *tick_time, TimeUnits units_changed) {
