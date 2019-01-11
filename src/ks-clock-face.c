@@ -11,34 +11,34 @@ const int X_PADDING = 6;
 const int Y_PADDING = 2;
 const int TZ_VALUE_X_POS = 80;
 
+//                         0      1      2      3      4
 const char* TZ_NAMES[] = {"SFO", "NYC", "UTC", "BKK", "TOK"};
-const int TZ_OFFSETS[] = {-8, -5, 0, 7, 9};
+const int TZ_OFFSETS[] = {-8,    -5,    0,     7,     9};
+
+int get_day_offset(struct tm utc_tm, int tz_offset) {
+  return 0;
+}
+
+static struct tm get_local_time(struct tm utc_tm, int tz_offset) {
+  struct tm target;
+  target.tm_min = utc_tm.tm_min;
+  target.tm_hour = (utc_tm.tm_hour + tz_offset) % 24;
+  return target;
+}
 
 static void update_time() {
     time_t current_time = time(NULL);
-    struct tm *utc_tm = gmtime(&current_time);
-    const int utc_hour = utc_tm->tm_hour;
-    const int utc_min  = utc_tm->tm_min;
+    struct tm utc_tm = *gmtime(&current_time);
+    const int utc_hour = utc_tm.tm_hour;
+    const int utc_min  = utc_tm.tm_min;
 
-    struct tm sfo_tm;
-    sfo_tm.tm_min = utc_min;
-    if (utc_hour < 24 - TZ_OFFSETS[0]) {
-      sfo_tm.tm_hour = utc_hour + TZ_OFFSETS[0];
-    } else {
-      sfo_tm.tm_hour = (utc_hour + TZ_OFFSETS[0]) % 24;
-    }
+    struct tm sfo_tm = get_local_time(utc_tm, TZ_OFFSETS[0]);
 
     // TODO: NYC
 
     // UTC time: no offset.
 
-    struct tm bkk_tm;
-    bkk_tm.tm_min = utc_min;
-    if (utc_hour < 24 - TZ_OFFSETS[3]) {
-      bkk_tm.tm_hour = utc_hour + TZ_OFFSETS[3];
-    } else {
-      bkk_tm.tm_hour = (utc_hour + TZ_OFFSETS[3]) % 24;
-    }
+    struct tm bkk_tm = get_local_time(utc_tm, TZ_OFFSETS[3]);
 
     static char s_time_buffers[TZ_COUNT][8];
 
@@ -46,12 +46,12 @@ static void update_time() {
     text_layer_set_text(s_name_layers[0], TZ_NAMES[0]);
     text_layer_set_text(s_time_layers[0], s_time_buffers[0]);
 
-    strftime(s_time_buffers[1], sizeof(s_time_buffers[1]), "%H:%M", utc_tm);
+    strftime(s_time_buffers[1], sizeof(s_time_buffers[1]), "%H:%M", &utc_tm);
     text_layer_set_text(s_name_layers[1], TZ_NAMES[1]);
     text_layer_set_text(s_time_layers[1], s_time_buffers[1]);
 
     strftime(s_time_buffers[2], sizeof(s_time_buffers[2]), "%H:%M", &bkk_tm);
-    text_layer_set_text(s_name_layers[2], TZ_NAMES[2]);
+    text_layer_set_text(s_name_layers[2], TZ_NAMES[3]);
     text_layer_set_text(s_time_layers[2], s_time_buffers[2]);
 }
 
