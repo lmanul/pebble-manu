@@ -32,10 +32,6 @@ static void update_time() {
   time_t current_time = time(NULL);
   struct tm utc_tm = *gmtime(&current_time);
 
-  // char display_date[20];
-  //strftime(display_date, sizeof(display_date), "%a %e %b", &utc_tm);
-  //text_layer_set_text(date_layer, display_date);
-  text_layer_set_text(date_layer, "Date coming soon");
 
   struct tm local_times[TZ_COUNT];
   static char s_time_buffers[TZ_COUNT][8];
@@ -46,6 +42,11 @@ static void update_time() {
     text_layer_set_text(name_layers[i], TZ_NAMES[i]);
     text_layer_set_text(time_layers[i], s_time_buffers[i]);
   }
+
+  //char display_date[20];
+  //strftime(display_date, sizeof(display_date), "%a %e %b", &utc_tm);
+  //text_layer_set_text(date_layer, display_date);
+  text_layer_set_text(date_layer, s_time_buffers[0]);
 }
 
 static void tick_minute_handler(struct tm *tick_time, TimeUnits units_changed) {
