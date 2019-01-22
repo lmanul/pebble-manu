@@ -1,21 +1,21 @@
 #include <pebble.h>
 
-#define TZ_COUNT 5
+#define TZ_COUNT 6
 
 static Window *s_main_window;
 static TextLayer *name_layers[TZ_COUNT];
 static TextLayer *time_layers[TZ_COUNT];
 static TextLayer *date_layer;
 
-const int FIRST_TIME_TOP_OFFSET = 22;
-const int LINE_HEIGHT = 28;
+const int FIRST_TIME_TOP_OFFSET = 18;
+const int LINE_HEIGHT = 24;
 const int X_PADDING = 6;
 const int Y_PADDING = 0;
 const int TZ_VALUE_X_POS = 70;
 
-//                         0      1      2      3      4
-const char* TZ_NAMES[] = {"SFO", "NYC", "UTC", "BKK", "TOK"};
-const int TZ_OFFSETS[] = {-8,    -5,    0,     7,     9};
+//                         0      1      2      3      4      5
+const char* TZ_NAMES[] = {"SFO", "NYC", "UTC", "BKK", "TOK", "SYD"};
+const int TZ_OFFSETS[] = {-8,    -5,    0,     7,     9,     11};
 
 static struct tm get_local_time(struct tm utc_tm, int tz_offset) {
   struct tm target;
@@ -55,7 +55,7 @@ static void apply_style(TextLayer* t, bool bold) {
   text_layer_set_background_color(t, GColorWhite);
   text_layer_set_text_color(t, GColorBlack);
   text_layer_set_font(t, fonts_get_system_font(
-      bold ? FONT_KEY_GOTHIC_28_BOLD : FONT_KEY_GOTHIC_28));
+      bold ? FONT_KEY_GOTHIC_24_BOLD : FONT_KEY_GOTHIC_24));
 }
 
 static void main_window_load(Window *window) {
