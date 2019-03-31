@@ -15,7 +15,7 @@ const int TZ_VALUE_X_POS = 70;
 
 //                         0      1      2      3      4      5
 const char* TZ_NAMES[] = {"SFO", "NYC", "UTC", "PAR", "SHA", "TOK"};
-const int TZ_OFFSETS[] = {-7,    -4,    0,     1,     8,     9};
+const int TZ_OFFSETS[] = {-7,    -4,    0,     2,     8,     9};
 
 static struct tm get_local_time(struct tm utc_tm, int tz_offset) {
   struct tm target;
